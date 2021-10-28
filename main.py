@@ -1,37 +1,119 @@
 import clang
 import clang.cindex
+import os
 
-# List of kinds to recurse in:
-# namespace
-# class declaration
-# function body
+from clang.cindex import CursorKind
+from string import Template
 
-# function signature in cpp:
-# return_type class_name::cursor.spelling(arguments) const {}
-def traverse(cursor, offset):
-    print("{}{}: name: {}".format(offset, cursor.kind, cursor.spelling))
-    if cursor.kind == clang.cindex.CursorKind.CXX_METHOD:
-        print("{}start: {}, end: {}".format(offset, cursor.extent.start, cursor.extent.end))
-        print("{}is_static_method: {}".format(offset, cursor.is_static_method()))
-        print("{}is_definition: {}".format(offset, cursor.is_definition()))
-        print("{}is_const_method: {}".format(offset, cursor.is_const_method()))
-        print("{}is_virtual_method: {}".format(offset, cursor.is_virtual_method()))
-        #print("{}storage_class: {}".format(offset, cursor.storage_class))
-        print("{}result_type: {}".format(offset, cursor.result_type.spelling))
-        #print("{}displayname: {}".format(offset, cursor.displayname))
-    #if cursor.kind == clang.cindex.CursorKind.DECL_STMT:
-    #    print("{}start: {}, end: {}".format(offset, cursor.extent.start, cursor.extent.end))
-    if cursor.kind == clang.cindex.CursorKind.COMPOUND_STMT:
-        print("{}start: {}, end: {}".format(offset, cursor.extent.start, cursor.extent.end))
-        pass
+IMPORTANT_KINDS = [
+            CursorKind.NAMESPACE,
+            CursorKind.CLASS_DECL,
+            CursorKind.STRUCT_DECL,
+            CursorKind.CXX_METHOD,
+            CursorKind.FUNCTION_DECL,
+    ]
+
+class Node:
+    def __init__(self, cursor):
+        self.cursor = cursor
+        self.children = []
+
+def traverse(cursor, offset, parent_node):
+    if cursor.kind not in IMPORTANT_KINDS:
+        return
+    if (cursor.kind == CursorKind.CXX_METHOD or cursor.kind == CursorKind.FUNCTION_DECL) and not cursor.is_definition():
+        return
+    node = Node(cursor)
+    parent_node.children.append(node)
     for child in cursor.get_children():
-        traverse(child, offset+"\t")
+        traverse(child, offset+"\t", node)
+
+def extract_body(cursor):
+    compound = None
+    for c in cursor.get_children():
+        if c.kind == CursorKind.COMPOUND_STMT:
+            compound = c
+    with open(cursor.location.file.name, 'r') as f:
+        content = f.read()
+        return content[compound.extent.start.offset: compound.extent.end.offset]
+
+def extract_args(cursor):
+    args = []
+    for arg in cursor.get_arguments():
+        args.append("{} {}".format(arg.type.spelling, arg.spelling))
+    return ", ".join(args)
+
+def build_method(cursor):
+    const_tag = "const " if cursor.is_const_method() else ""
+
+    output_string = "\n{return_type} ${{parent}}{name}({args}) {const_tag}{body}\n".format(
+            return_type=cursor.result_type.spelling,
+            name=cursor.spelling,
+            args=extract_args(cursor),
+            const_tag=const_tag,
+            body=extract_body(cursor))
+    return output_string
+
+def build_function(cursor):
+    output_string = "\n{return_type} ${{parent}}{name}({args}) {body}\n".format(
+            return_type=cursor.result_type.spelling,
+            name=cursor.spelling,
+            args=extract_args(cursor),
+            body=extract_body(cursor))
+    return output_string
+
+def show_candidates(node):
+    if node.cursor.kind == CursorKind.CXX_METHOD or node.cursor.kind == CursorKind.FUNCTION_DECL:
+        location = node.cursor.location
+        print("{f}:{l}:{c}: candidate: ".format(
+            f=location.file,
+            l=location.line,
+            c=location.column
+            ))
+    for child in node.children:
+        show_candidates(child)
+
+def build_cpp(node):
+    output_string = ""
+
+    for c in node.children:
+        child_out = build_cpp(c)
+        if child_out:
+            output_string+=child_out
+
+    if node.cursor.kind == CursorKind.TRANSLATION_UNIT:
+        # if we reached the top, it means that there are no parents available
+        output_string = '#include "{include}"\n{content}\n'.format(
+                include=os.path.basename(node.cursor.spelling),
+                content = output_string)
+        return Template(output_string).substitute(parent='')
+
+    if node.cursor.kind == CursorKind.NAMESPACE:
+        return '\nnamespace {ns} {{{body}\n}} // {ns}'.format(ns=node.cursor.spelling, body=output_string)
+
+    if node.cursor.kind == CursorKind.CXX_METHOD:
+        return build_method(node.cursor)
+
+    if node.cursor.kind == CursorKind.FUNCTION_DECL:
+        return build_function(node.cursor)
+
+    if node.cursor.kind == CursorKind.CLASS_DECL or node.cursor.kind == CursorKind.STRUCT_DECL:
+        return Template(output_string).substitute(parent="${{parent}}{}::".format(node.cursor.spelling))
+
+    return output_string
 
 def main():
     index = clang.cindex.Index.create()
     translation_unit = index.parse('test/header.hpp', args=['-std=c++17'])
+    #for c in translation_unit.cursor.walk_preorder():
+    #    print("kind: {}".format(c.kind))
+    main_node = Node(translation_unit.cursor)
     for c in translation_unit.cursor.get_children():
-        traverse(c, "")
+        traverse(c, "", main_node)
+    output = build_cpp(main_node)
+    print(output)
+
+    show_candidates(main_node)
 
 if __name__ == "__main__":
     main()
