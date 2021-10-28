@@ -19,6 +19,9 @@ class Node:
         self.children = []
 
 def traverse(cursor, offset, parent_node):
+    # filter includes
+    if cursor.translation_unit.spelling != str(cursor.location.file):
+        return
     if cursor.kind not in IMPORTANT_KINDS:
         return
     if (cursor.kind == CursorKind.CXX_METHOD or cursor.kind == CursorKind.FUNCTION_DECL) and not cursor.is_definition():

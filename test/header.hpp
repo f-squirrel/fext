@@ -1,4 +1,4 @@
-//#include <iostream>
+#include <iostream>
 
 namespace ns1 {
 namespace ns2 {
