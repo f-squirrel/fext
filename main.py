@@ -31,14 +31,12 @@ def traverse(cursor, offset, parent_node):
     for child in cursor.get_children():
         traverse(child, offset+"\t", node)
 
-def extract_body(cursor):
+def extract_body(cursor, content):
     compound = None
     for c in cursor.get_children():
         if c.kind == CursorKind.COMPOUND_STMT:
             compound = c
-    with open(cursor.location.file.name, 'r') as f:
-        content = f.read()
-        return content[compound.extent.start.offset: compound.extent.end.offset]
+    return content[compound.extent.start.offset: compound.extent.end.offset]
 
 def extract_args(cursor):
     args = []
@@ -46,7 +44,7 @@ def extract_args(cursor):
         args.append("{} {}".format(arg.type.spelling, arg.spelling))
     return ", ".join(args)
 
-def build_method(cursor):
+def build_method(cursor, f):
     const_tag = "const " if cursor.is_const_method() else ""
 
     output_string = "\n{return_type} ${{parent}}{name}({args}) {const_tag}{body}\n".format(
@@ -54,15 +52,15 @@ def build_method(cursor):
             name=cursor.spelling,
             args=extract_args(cursor),
             const_tag=const_tag,
-            body=extract_body(cursor))
+            body=extract_body(cursor, f))
     return output_string
 
-def build_function(cursor):
+def build_function(cursor, f):
     output_string = "\n{return_type} ${{parent}}{name}({args}) {body}\n".format(
             return_type=cursor.result_type.spelling,
             name=cursor.spelling,
             args=extract_args(cursor),
-            body=extract_body(cursor))
+            body=extract_body(cursor, f))
     return output_string
 
 def show_candidates(node):
@@ -76,11 +74,11 @@ def show_candidates(node):
     for child in node.children:
         show_candidates(child)
 
-def build_cpp(node):
+def build_cpp(node, f):
     output_string = ""
 
     for c in node.children:
-        child_out = build_cpp(c)
+        child_out = build_cpp(c, f)
         if child_out:
             output_string+=child_out
 
@@ -95,10 +93,10 @@ def build_cpp(node):
         return '\nnamespace {ns} {{{body}\n}} // {ns}'.format(ns=node.cursor.spelling, body=output_string)
 
     if node.cursor.kind == CursorKind.CXX_METHOD:
-        return build_method(node.cursor)
+        return build_method(node.cursor, f)
 
     if node.cursor.kind == CursorKind.FUNCTION_DECL:
-        return build_function(node.cursor)
+        return build_function(node.cursor, f)
 
     if node.cursor.kind == CursorKind.CLASS_DECL or node.cursor.kind == CursorKind.STRUCT_DECL:
         return Template(output_string).substitute(parent="${{parent}}{}::".format(node.cursor.spelling))
@@ -107,13 +105,16 @@ def build_cpp(node):
 
 def main():
     index = clang.cindex.Index.create()
-    translation_unit = index.parse('test/header.hpp', args=['-std=c++17'])
+    filename = 'test/header.hpp'
+    translation_unit = index.parse(filename, args=['-std=c++17'])
     #for c in translation_unit.cursor.walk_preorder():
     #    print("kind: {}".format(c.kind))
     main_node = Node(translation_unit.cursor)
     for c in translation_unit.cursor.get_children():
         traverse(c, "", main_node)
-    output = build_cpp(main_node)
+    with open(filename, 'r') as f:
+        content = f.read()
+        output = build_cpp(main_node, content)
     print(output)
 
     show_candidates(main_node)
