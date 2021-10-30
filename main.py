@@ -5,69 +5,8 @@ import os
 from clang.cindex import CursorKind
 from string import Template
 
-IMPORTANT_KINDS = [
-            CursorKind.NAMESPACE,
-            CursorKind.CLASS_DECL,
-            CursorKind.STRUCT_DECL,
-            CursorKind.CXX_METHOD,
-            CursorKind.FUNCTION_DECL,
-    ]
-
-class MessagePrinter:
-    def __init__(self, main_node, file_content):
-        self._main_node = main_node
-        self._file_content = file_content
-
-    def _get_methods(self, node):
-        output = []
-        if node.cursor.kind == CursorKind.CXX_METHOD or node.cursor.kind == CursorKind.FUNCTION_DECL:
-            output.append(node.cursor)
-        for child in node.children:
-            output.extend(self._get_methods(child))
-        return output
-
-    def print(self):
-        methods = self._get_methods(self._main_node)
-        for m in methods:
-            location = m.location
-            print("{f}:{l}:{c}: candidate: ".format(
-                f=location.file,
-                l=location.line,
-                c=location.column,
-            ))
-
-
-class Filter:
-    def __init__(self, filename):
-        self._filename = filename
-
-    def filter(self):
-        index = clang.cindex.Index.create()
-        translation_unit = index.parse(self._filename, args=['-std=c++17'])
-        root = Node(translation_unit.cursor)
-        for c in translation_unit.cursor.get_children():
-            self._traverse(c, "", root)
-        return root
-
-    def _is_from_this_file(self, cursor):
-        return cursor.translation_unit.spelling == str(cursor.location.file)
-
-    def _traverse(self, cursor, offset, parent_node):
-        if not self._is_from_this_file(cursor):
-            return
-        if cursor.kind not in IMPORTANT_KINDS:
-            return
-        if (cursor.kind == CursorKind.CXX_METHOD or cursor.kind == CursorKind.FUNCTION_DECL) and not cursor.is_definition():
-            return
-        node = Node(cursor)
-        parent_node.children.append(node)
-        for child in cursor.get_children():
-            self._traverse(child, offset+"\t", node)
-
-class Node:
-    def __init__(self, cursor):
-        self.cursor = cursor
-        self.children = []
+from fext import messageprinter
+from fext import nodefilter
 
 def get_body(cursor):
     for c in cursor.get_children():
@@ -135,14 +74,14 @@ def build_cpp(node, f):
 
 def main():
     filename = 'test/header.hpp'
-    filter = Filter(filename)
+    filter = nodefilter.NodeFilter(filename)
     root = filter.filter()
     with open(filename, 'r') as f:
         content = f.read()
         #output = build_cpp(root, content)
         #print(output)
 
-        printer = MessagePrinter(root, content)
+        printer = messageprinter.MessagePrinter(root, content)
         printer.print()
 
 if __name__ == "__main__":

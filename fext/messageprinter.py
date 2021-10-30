@@ -1,5 +1,5 @@
 import clang
-import clang.cindex
+from clang.cindex import CursorKind
 
 
 class MessagePrinter:
