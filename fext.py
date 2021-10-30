@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 from fext import cppfilebuilder
 from fext import messageprinter
