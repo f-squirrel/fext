@@ -29,11 +29,12 @@ def main():
     with open(filename, 'r') as f:
         content = f.read()
 
-        builder = cppfilebuilder.CppFileBuilder(root, content)
-        print(builder.build())
-
-        printer = messageprinter.MessagePrinter(root, content)
-        printer.print()
+        if args.fix:
+            builder = cppfilebuilder.CppFileBuilder(root, content)
+            print(builder.build())
+        else:
+            printer = messageprinter.MessagePrinter(root, content)
+            printer.print()
 
 
 if __name__ == "__main__":
