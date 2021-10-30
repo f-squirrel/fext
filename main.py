@@ -13,30 +13,71 @@ IMPORTANT_KINDS = [
             CursorKind.FUNCTION_DECL,
     ]
 
+class MessagePrinter:
+    def __init__(self, main_node, file_content):
+        self._main_node = main_node
+        self._file_content = file_content
+
+    def _get_methods(self, node):
+        output = []
+        if node.cursor.kind == CursorKind.CXX_METHOD or node.cursor.kind == CursorKind.FUNCTION_DECL:
+            output.append(node.cursor)
+        for child in node.children:
+            output.extend(self._get_methods(child))
+        return output
+
+    def print(self):
+        methods = self._get_methods(self._main_node)
+        for m in methods:
+            location = m.location
+            print("{f}:{l}:{c}: candidate: ".format(
+                f=location.file,
+                l=location.line,
+                c=location.column,
+            ))
+
+
+class Filter:
+    def __init__(self, filename):
+        self._filename = filename
+
+    def filter(self):
+        index = clang.cindex.Index.create()
+        translation_unit = index.parse(self._filename, args=['-std=c++17'])
+        root = Node(translation_unit.cursor)
+        for c in translation_unit.cursor.get_children():
+            self._traverse(c, "", root)
+        return root
+
+    def _is_from_this_file(self, cursor):
+        return cursor.translation_unit.spelling == str(cursor.location.file)
+
+    def _traverse(self, cursor, offset, parent_node):
+        if not self._is_from_this_file(cursor):
+            return
+        if cursor.kind not in IMPORTANT_KINDS:
+            return
+        if (cursor.kind == CursorKind.CXX_METHOD or cursor.kind == CursorKind.FUNCTION_DECL) and not cursor.is_definition():
+            return
+        node = Node(cursor)
+        parent_node.children.append(node)
+        for child in cursor.get_children():
+            self._traverse(child, offset+"\t", node)
+
 class Node:
     def __init__(self, cursor):
         self.cursor = cursor
         self.children = []
 
-def traverse(cursor, offset, parent_node):
-    # filter includes
-    if cursor.translation_unit.spelling != str(cursor.location.file):
-        return
-    if cursor.kind not in IMPORTANT_KINDS:
-        return
-    if (cursor.kind == CursorKind.CXX_METHOD or cursor.kind == CursorKind.FUNCTION_DECL) and not cursor.is_definition():
-        return
-    node = Node(cursor)
-    parent_node.children.append(node)
-    for child in cursor.get_children():
-        traverse(child, offset+"\t", node)
-
-def extract_body(cursor, content):
-    compound = None
+def get_body(cursor):
     for c in cursor.get_children():
         if c.kind == CursorKind.COMPOUND_STMT:
-            compound = c
-    return content[compound.extent.start.offset: compound.extent.end.offset]
+            return c
+    return None
+
+def extract_body(cursor, content):
+    body = get_body(cursor)
+    return content[body.extent.start.offset: body.extent.end.offset]
 
 def extract_args(cursor):
     args = []
@@ -62,17 +103,6 @@ def build_function(cursor, f):
             args=extract_args(cursor),
             body=extract_body(cursor, f))
     return output_string
-
-def show_candidates(node):
-    if node.cursor.kind == CursorKind.CXX_METHOD or node.cursor.kind == CursorKind.FUNCTION_DECL:
-        location = node.cursor.location
-        print("{f}:{l}:{c}: candidate: ".format(
-            f=location.file,
-            l=location.line,
-            c=location.column
-            ))
-    for child in node.children:
-        show_candidates(child)
 
 def build_cpp(node, f):
     output_string = ""
@@ -104,20 +134,16 @@ def build_cpp(node, f):
     return output_string
 
 def main():
-    index = clang.cindex.Index.create()
     filename = 'test/header.hpp'
-    translation_unit = index.parse(filename, args=['-std=c++17'])
-    #for c in translation_unit.cursor.walk_preorder():
-    #    print("kind: {}".format(c.kind))
-    main_node = Node(translation_unit.cursor)
-    for c in translation_unit.cursor.get_children():
-        traverse(c, "", main_node)
+    filter = Filter(filename)
+    root = filter.filter()
     with open(filename, 'r') as f:
         content = f.read()
-        output = build_cpp(main_node, content)
-    print(output)
+        #output = build_cpp(root, content)
+        #print(output)
 
-    show_candidates(main_node)
+        printer = MessagePrinter(root, content)
+        printer.print()
 
 if __name__ == "__main__":
     main()
