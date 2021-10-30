@@ -4,6 +4,7 @@ from clang.cindex import CursorKind
 
 from fext.node import Node
 
+
 IMPORTANT_KINDS = [
             CursorKind.NAMESPACE,
             CursorKind.CLASS_DECL,
