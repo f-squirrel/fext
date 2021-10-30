@@ -18,9 +18,9 @@ class MessagePrinter:
     def print(self):
         methods = self._get_methods(self._root)
         for m in methods:
-            location = m.location
+            token = next(m.get_tokens())
             print("{f}:{l}:{c}: candidate: ".format(
-                f=location.file,
-                l=location.line,
-                c=location.column,
+                f=token.location.file,
+                l=token.location.line,
+                c=token.location.column,
             ))
