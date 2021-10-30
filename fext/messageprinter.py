@@ -1,4 +1,3 @@
-import clang
 from clang.cindex import CursorKind
 
 
