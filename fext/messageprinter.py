@@ -3,8 +3,8 @@ from clang.cindex import CursorKind
 
 
 class MessagePrinter:
-    def __init__(self, main_node, file_content):
-        self._main_node = main_node
+    def __init__(self, root, file_content):
+        self._root = root
         self._file_content = file_content
 
     def _get_methods(self, node):
@@ -16,7 +16,7 @@ class MessagePrinter:
         return output
 
     def print(self):
-        methods = self._get_methods(self._main_node)
+        methods = self._get_methods(self._root)
         for m in methods:
             location = m.location
             print("{f}:{l}:{c}: candidate: ".format(
