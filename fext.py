@@ -4,6 +4,7 @@ import argparse
 from fext import cppfilebuilder
 from fext import messageprinter
 from fext import nodefilter
+from fext import headerfileupdater
 
 
 def parse_args():
@@ -31,7 +32,9 @@ def main():
 
         if args.fix:
             builder = cppfilebuilder.CppFileBuilder(root, content)
-            print(builder.build())
+            print("Generated CPP:\n{}".format(builder.build()))
+            header_updater = headerfileupdater.HeaderFileUpdater(root, content)
+            print("Generated Header:\n{}".format(header_updater.update()))
         else:
             printer = messageprinter.MessagePrinter(root, content)
             printer.print()
