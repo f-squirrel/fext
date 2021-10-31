@@ -37,7 +37,7 @@ def main():
             print("Generated Header:\n{}".format(header_updater.update()))
         else:
             printer = messageprinter.MessagePrinter(root, content)
-            printer.print()
+            print(printer.print())
 
 
 if __name__ == "__main__":
