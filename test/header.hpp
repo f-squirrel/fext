@@ -50,6 +50,9 @@ inline void free_function() { int a = 0; ++a; }
 template<typename T>
 inline void free_function(T t) { int a = 0; ++a; }
 
+template<>
+inline void free_function<int>(int i) {}
+
 inline void free_inline_function(int a) { a++; a = a + 1; free_function(a); }
 
 void free_funciton_only_decl();
