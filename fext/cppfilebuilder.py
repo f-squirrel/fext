@@ -36,7 +36,7 @@ class CppFileBuilder:
             return self._build_function(node.cursor)
 
         if node.cursor.kind == CursorKind.CLASS_DECL or node.cursor.kind == CursorKind.STRUCT_DECL:
-            return Template(output_string).substitute(parent="${{parent}}{}::".format(node.cursor.spelling))
+            return Template(output_string).substitute(parent="${{parent}}{}::".format(node.cursor.displayname))
 
     def _get_body(self, cursor):
         for c in cursor.get_children():

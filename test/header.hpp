@@ -39,6 +39,12 @@ class F {
         void foo(T v) { ++v; --v; T sum = v + v; }
 };
 
+template<>
+class F<int> {
+    public:
+        void foo(int v) { ++v; --v; int sum = v + v; }
+};
+
 inline void free_function() { int a = 0; ++a; }
 
 template<typename T>
