@@ -1,5 +1,5 @@
 import unittest
-from fext import messageprinter
+from fext import diagnostic
 from fext import nodefilter
 
 EXPECTED_OUTPUT = ''
@@ -13,8 +13,8 @@ class TestEmptyHeader(unittest.TestCase):
         root = filter.filter()
         with open(filename, 'r') as f:
             content = f.read()
-            printer = messageprinter.MessagePrinter(root, content)
-            self.assertEqual(printer.print(), EXPECTED_OUTPUT)
+            diag = diagnostic.Diagnostic(root, content)
+            self.assertEqual(diag.show(), EXPECTED_OUTPUT)
 
     def test_messages_empty_header_with_includes(self):
         filename = "tests/test_input/empty_header_with_include.h"
@@ -23,8 +23,8 @@ class TestEmptyHeader(unittest.TestCase):
         root = filter.filter()
         with open(filename, 'r') as f:
             content = f.read()
-            printer = messageprinter.MessagePrinter(root, content)
-            self.assertEqual(printer.print(), EXPECTED_OUTPUT)
+            diag = diagnostic.Diagnostic(root, content)
+            self.assertEqual(diag.show(), EXPECTED_OUTPUT)
 
 if __name__ == '__main__':
     unittest.main()

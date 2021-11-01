@@ -1,6 +1,6 @@
 
 import unittest
-from fext import messageprinter
+from fext import diagnostic
 from fext import nodefilter
 
 
@@ -29,8 +29,8 @@ class TestMiltipleDeclarations(unittest.TestCase):
         root = filter.filter()
         with open(filename, 'r') as f:
             content = f.read()
-            printer = messageprinter.MessagePrinter(root, content)
-            self.assertEqual(printer.print().strip(), EXPECTED_OUTPUT)
+            diag = diagnostic.Diagnostic(root, content)
+            self.assertEqual(diag.show().strip(), EXPECTED_OUTPUT)
 
 if __name__ == '__main__':
     unittest.main()

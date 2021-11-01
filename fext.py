@@ -2,7 +2,7 @@
 
 import argparse
 from fext import cppfilebuilder
-from fext import messageprinter
+from fext import diagnostic
 from fext import nodefilter
 from fext import headerfileupdater
 
@@ -36,8 +36,8 @@ def main():
             header_updater = headerfileupdater.HeaderFileUpdater(root, content)
             print("Generated Header:\n{}".format(header_updater.update()))
         else:
-            printer = messageprinter.MessagePrinter(root, content)
-            print(printer.print())
+            diag = diagnostic.Diagnostic(root, content)
+            print(diag.show())
 
 
 if __name__ == "__main__":

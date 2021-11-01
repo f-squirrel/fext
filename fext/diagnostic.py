@@ -1,7 +1,7 @@
 from clang.cindex import CursorKind
 
 
-class MessagePrinter:
+class Diagnostic:
     def __init__(self, root, file_content):
         self._root = root
         self._file_content = file_content
@@ -14,7 +14,7 @@ class MessagePrinter:
             output.extend(self._get_methods(child))
         return output
 
-    def print(self):
+    def show(self):
         output = ""
         methods = self._get_methods(self._root)
         for m in methods:
