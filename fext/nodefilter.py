@@ -34,7 +34,7 @@ class NodeFilter:
             return
         if cursor.kind not in IMPORTANT_KINDS:
             return
-        if (cursor.kind == CursorKind.CXX_METHOD or cursor.kind == CursorKind.FUNCTION_DECL) and not cursor.is_definition():
+        if (cursor.kind == clang.cindex.CursorKind.CXX_METHOD or cursor.kind == CursorKind.FUNCTION_DECL) and not cursor.is_definition():
             return
         node = Node(cursor)
         parent_node.children.append(node)
