@@ -8,6 +8,6 @@ unit does not exist, the tool creates it.
 
 ## Caveats
 
-* Function Extractor expects to receive a valid C/C++ code as an input
-* Highly recommended to run it only for already commited code
-* The tool does not support any special formatting, if needed run clang-tidy over the changed/created files
+* Function Extractor expects to receive valid C/C++ code as input
+* Highly recommended to run it only for commited code
+* The tool does not offer custom formatting. If needed, [clang-format](https://clang.llvm.org/docs/ClangFormat.html) can be used.
