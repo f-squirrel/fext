@@ -1,6 +1,5 @@
 from clang.cindex import CursorKind
 
-
 class HeaderFileUpdater:
     def __init__(self, root, header_content):
         self._header_content = header_content
@@ -11,7 +10,8 @@ class HeaderFileUpdater:
 
     def _get_methods(self, node):
         output = []
-        if node.cursor.kind == CursorKind.CXX_METHOD or node.cursor.kind == CursorKind.FUNCTION_DECL:
+        if node.cursor.kind == CursorKind.CXX_METHOD or \
+            node.cursor.kind == CursorKind.FUNCTION_DECL:
             output.append(node.cursor)
         for child in node.children:
             output.extend(self._get_methods(child))

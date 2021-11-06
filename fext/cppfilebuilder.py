@@ -27,7 +27,9 @@ class CppFileBuilder:
             return Template(output_string).substitute(parent='')
 
         if node.cursor.kind == CursorKind.NAMESPACE:
-            return '\nnamespace {ns} {{{body}\n}} // {ns}'.format(ns=node.cursor.spelling, body=output_string)
+            return '\nnamespace {ns} {{{body}\n}} // {ns}'.format(
+                ns=node.cursor.spelling,
+                body=output_string)
 
         if node.cursor.kind == CursorKind.CXX_METHOD:
             return self._build_method(node.cursor)
@@ -35,8 +37,10 @@ class CppFileBuilder:
         if node.cursor.kind == CursorKind.FUNCTION_DECL:
             return self._build_function(node.cursor)
 
-        if node.cursor.kind == CursorKind.CLASS_DECL or node.cursor.kind == CursorKind.STRUCT_DECL:
-            return Template(output_string).substitute(parent="${{parent}}{}::".format(node.cursor.displayname))
+        if node.cursor.kind == CursorKind.CLASS_DECL \
+            or node.cursor.kind == CursorKind.STRUCT_DECL:
+            return Template(output_string).substitute(
+                parent="${{parent}}{}::".format(node.cursor.displayname))
 
     def _get_body(self, cursor):
         for c in cursor.get_children():
