@@ -1,5 +1,6 @@
 from clang.cindex import CursorKind
 
+
 class HeaderFileUpdater:
     def __init__(self, root, header_content):
         self._header_content = header_content
