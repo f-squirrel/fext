@@ -11,3 +11,14 @@ unit does not exist, the tool creates it.
 * Function Extractor expects to receive valid C/C++ code as input
 * Highly recommended to run it only for commited code
 * The tool does not offer custom formatting. If needed, [clang-format](https://clang.llvm.org/docs/ClangFormat.html) can be used.
+
+
+## Roadmap
+
+- [x] Diagnostic: Identify definitions in header files and print them
+- [x] Update existing header files
+- [x] Create translation unit if does not exist
+- [ ] Update existing translation units
+- [ ] Support config file
+- [ ] Support exclude directories, paths, files (probably via config)
+- [ ] Support parallel execution
