@@ -22,3 +22,4 @@ unit does not exist, the tool creates it.
 - [ ] Support config file
 - [ ] Support exclude directories, paths, files (probably via config)
 - [ ] Support parallel execution
+- [ ] Support [Compile database](https://clang.llvm.org/docs/JSONCompilationDatabase.html)
