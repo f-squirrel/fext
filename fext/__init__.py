@@ -1,1 +1,1 @@
-__all__ = ["diagnostic", "nodefilter", "cppfilebuilder"]
+__all__ = ["diagnostic", "nodefilter", "node", "cppfilebuilder"]

@@ -1,12 +1,13 @@
+from fext.node import Node
 from clang.cindex import CursorKind
 
 
 class Diagnostic:
-    def __init__(self, root, file_content):
+    def __init__(self, root: Node, file_content: str):
         self._root = root
         self._file_content = file_content
 
-    def _get_methods(self, node):
+    def _get_methods(self, node: Node) -> list:
         output = []
         if node.cursor.kind == CursorKind.CXX_METHOD or node.cursor.kind == CursorKind.FUNCTION_DECL:
             output.append(node.cursor)
@@ -14,7 +15,7 @@ class Diagnostic:
             output.extend(self._get_methods(child))
         return output
 
-    def show(self):
+    def show(self) -> str:
         output = ""
         methods = self._get_methods(self._root)
         for m in methods:

@@ -1,6 +1,7 @@
 import clang
 import clang.cindex
 from clang.cindex import CursorKind
+from clang.cindex import Cursor
 
 from fext.node import Node
 
@@ -15,10 +16,10 @@ IMPORTANT_KINDS = [
 
 
 class NodeFilter:
-    def __init__(self, filename):
+    def __init__(self, filename: str):
         self._filename = filename
 
-    def filter(self):
+    def filter(self) -> Node:
         index = clang.cindex.Index.create()
         translation_unit = index.parse(self._filename, args=['-std=c++17'])
         root = Node(translation_unit.cursor)
@@ -26,10 +27,10 @@ class NodeFilter:
             self._traverse(c, "", root)
         return root
 
-    def _is_from_this_file(self, cursor):
+    def _is_from_this_file(self, cursor: Cursor) -> bool:
         return cursor.translation_unit.spelling == str(cursor.location.file)
 
-    def _traverse(self, cursor, offset, parent_node):
+    def _traverse(self, cursor: Cursor, offset: str, parent_node: Node):
         if not self._is_from_this_file(cursor):
             return
         if cursor.kind not in IMPORTANT_KINDS:

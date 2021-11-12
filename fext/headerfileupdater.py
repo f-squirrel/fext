@@ -1,15 +1,17 @@
+from fext.node import Node
+from clang.cindex import Cursor
 from clang.cindex import CursorKind
 
 
 class HeaderFileUpdater:
-    def __init__(self, root, header_content):
+    def __init__(self, root: Node, header_content: str):
         self._header_content = header_content
         self._root= root
 
-    def update(self):
+    def update(self) -> str:
         return self._update(self._get_methods(self._root))
 
-    def _get_methods(self, node):
+    def _get_methods(self, node: Node) -> list:
         output = []
         if node.cursor.kind == CursorKind.CXX_METHOD or \
             node.cursor.kind == CursorKind.FUNCTION_DECL:
@@ -18,13 +20,13 @@ class HeaderFileUpdater:
             output.extend(self._get_methods(child))
         return output
 
-    def _get_body(self, cursor):
+    def _get_body(self, cursor: Cursor) -> Cursor:
         for c in cursor.get_children():
             if c.kind == CursorKind.COMPOUND_STMT:
                 return c
         return None
 
-    def _update(self, methods):
+    def _update(self, methods: list) -> str:
         header_template = ""
         last_offset = 0
         for m in methods:
