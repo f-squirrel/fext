@@ -19,7 +19,8 @@ unit does not exist, the tool creates it.
 - [x] Update existing header files
 - [x] Create translation unit if does not exist
 - [ ] Update existing translation units
-- [ ] Support config file
-- [ ] Support exclude directories, paths, files (probably via config)
-- [ ] Support parallel execution
-- [ ] Support [Compile database](https://clang.llvm.org/docs/JSONCompilationDatabase.html)
+- [ ] Config file
+    - [ ] Exclude directories, paths, files
+- [ ] Extended cmd line parameters
+    - [ ] Support parallel execution
+    - [ ] Support [Compile database](https://clang.llvm.org/docs/JSONCompilationDatabase.html)
