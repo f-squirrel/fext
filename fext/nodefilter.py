@@ -41,4 +41,3 @@ class NodeFilter:
         parent_node.children.append(node)
         for child in cursor.get_children():
             self._traverse(child, offset+"\t", node)
-

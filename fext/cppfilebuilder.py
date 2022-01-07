@@ -8,7 +8,7 @@ import os
 class CppFileBuilder:
     def __init__(self, root: Node, header_content: str):
         self._header_content = header_content
-        self._root= root
+        self._root = root
 
     def build(self) -> str:
         return self._build(self._root)
@@ -19,13 +19,13 @@ class CppFileBuilder:
         for c in node.children:
             child_out = self._build(c)
             if child_out:
-                output_string+=child_out
+                output_string += child_out
 
         if node.cursor.kind == CursorKind.TRANSLATION_UNIT:
             # if we reached the top, it means that there are no parents available
             output_string = '#include "{include}"\n{content}\n'.format(
                     include=os.path.basename(node.cursor.spelling),
-                    content = output_string)
+                    content=output_string)
             return Template(output_string).substitute(parent='')
 
         if node.cursor.kind == CursorKind.NAMESPACE:
@@ -40,9 +40,10 @@ class CppFileBuilder:
             return self._build_function(node.cursor)
 
         if node.cursor.kind == CursorKind.CLASS_DECL \
-            or node.cursor.kind == CursorKind.STRUCT_DECL:
+                or node.cursor.kind == CursorKind.STRUCT_DECL:
             return Template(output_string).substitute(
                 parent="${{parent}}{}::".format(node.cursor.displayname))
+        return ""
 
     def _get_body(self, cursor: Cursor) -> Cursor:
         for c in cursor.get_children():
@@ -78,4 +79,3 @@ class CppFileBuilder:
                 args=self._extract_args(cursor),
                 body=self._extract_body(cursor))
         return output_string
-

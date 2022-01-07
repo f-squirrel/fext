@@ -6,7 +6,7 @@ from clang.cindex import CursorKind
 class HeaderFileUpdater:
     def __init__(self, root: Node, header_content: str):
         self._header_content = header_content
-        self._root= root
+        self._root = root
 
     def update(self) -> str:
         return self._update(self._get_methods(self._root))
@@ -14,7 +14,7 @@ class HeaderFileUpdater:
     def _get_methods(self, node: Node) -> list:
         output = []
         if node.cursor.kind == CursorKind.CXX_METHOD or \
-            node.cursor.kind == CursorKind.FUNCTION_DECL:
+                node.cursor.kind == CursorKind.FUNCTION_DECL:
             output.append(node.cursor)
         for child in node.children:
             output.extend(self._get_methods(child))

@@ -9,7 +9,8 @@ class Diagnostic:
 
     def _get_methods(self, node: Node) -> list:
         output = []
-        if node.cursor.kind == CursorKind.CXX_METHOD or node.cursor.kind == CursorKind.FUNCTION_DECL:
+        if node.cursor.kind == CursorKind.CXX_METHOD or \
+                node.cursor.kind == CursorKind.FUNCTION_DECL:
             output.append(node.cursor)
         for child in node.children:
             output.extend(self._get_methods(child))
@@ -20,8 +21,10 @@ class Diagnostic:
         methods = self._get_methods(self._root)
         for m in methods:
             definition_obj = m.get_definition()
-            definition_str = self._file_content[definition_obj.extent.start.offset:definition_obj.extent.end.offset]
-            definition_str = definition_str[0:definition_str.index("{")].strip()
+            definition_str = \
+                self._file_content[definition_obj.extent.start.offset:definition_obj.extent.end.offset]
+            definition_str = \
+                definition_str[0:definition_str.index("{")].strip()
 
             token = next(m.get_tokens())
             msg = "{f}:{l}:{c}: {m}".format(
@@ -32,4 +35,3 @@ class Diagnostic:
             )
             output += "\n{}".format(msg)
         return output
-

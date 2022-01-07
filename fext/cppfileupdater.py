@@ -1,9 +1,9 @@
 from fext import nodefilter
 from fext.node import Node
-#from clang.cindex import CursorKind
-#from string import Template
-#import clang.cindex
-#import os
+# from clang.cindex import CursorKind
+# from string import Template
+# import clang.cindex
+# import os
 
 
 class CppFileUpdater:
@@ -12,8 +12,8 @@ class CppFileUpdater:
         self._cpp_root = nodefilter.NodeFilter(filename=filename).filter()
         with open(filename, "r") as f:
             self._cpp_content = f.read()
-        #index = clang.cindex.Index.create()
-        #translation_unit = index.parse(filename, args=['-std=c++17'])
+        # index = clang.cindex.Index.create()
+        # translation_unit = index.parse(filename, args=['-std=c++17'])
 
     def update(self):
         pass
@@ -23,4 +23,3 @@ class CppFileUpdater:
 
     def _build(self):
         pass
-
