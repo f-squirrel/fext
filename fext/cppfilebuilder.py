@@ -24,8 +24,8 @@ class CppFileBuilder:
         if node.cursor.kind == CursorKind.TRANSLATION_UNIT:
             # if we reached the top, it means that there are no parents available
             output_string = '#include "{include}"\n{content}\n'.format(
-                    include=os.path.basename(node.cursor.spelling),
-                    content=output_string)
+                include=os.path.basename(node.cursor.spelling),
+                content=output_string)
             return Template(output_string).substitute(parent='')
 
         if node.cursor.kind == CursorKind.NAMESPACE:
@@ -65,17 +65,17 @@ class CppFileBuilder:
         const_tag = "const " if cursor.is_const_method() else ""
 
         output_string = "\n{return_type} ${{parent}}{name}({args}) {const_tag}{body}\n".format(
-                return_type=cursor.result_type.spelling,
-                name=cursor.spelling,
-                args=self._extract_args(cursor),
-                const_tag=const_tag,
-                body=self._extract_body(cursor))
+            return_type=cursor.result_type.spelling,
+            name=cursor.spelling,
+            args=self._extract_args(cursor),
+            const_tag=const_tag,
+            body=self._extract_body(cursor))
         return output_string
 
     def _build_function(self, cursor: Cursor) -> str:
         output_string = "\n{return_type} ${{parent}}{name}({args}) {body}\n".format(
-                return_type=cursor.result_type.spelling,
-                name=cursor.spelling,
-                args=self._extract_args(cursor),
-                body=self._extract_body(cursor))
+            return_type=cursor.result_type.spelling,
+            name=cursor.spelling,
+            args=self._extract_args(cursor),
+            body=self._extract_body(cursor))
         return output_string
