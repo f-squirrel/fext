@@ -20,7 +20,7 @@ inline void free_function<int>(int i)
 tests/test_input/multiple_declarations.h:56:1: inline void free_inline_function(int a)'''
 
 
-class TestMiltipleDeclarations(unittest.TestCase):
+class TestMultipleDeclarations(unittest.TestCase):
 
     def test_messages(self):
         filename = "tests/test_input/multiple_declarations.h"

@@ -1,0 +1,34 @@
+#include "multiple_declarations.h"
+
+namespace ns1 {
+namespace ns2 {
+void A::virtual_method() {}
+
+void B::foo(int a, bool b) { ++a; }
+
+void B::zzz() {  }
+
+void B::aaa() {  }
+
+void B::const_method() const {}
+
+void B::virtual_method() {}
+
+int B::auto_method() {
+        return 42;
+    }
+
+void B::C::c_method() {}
+
+void S::f() {}
+
+} // ns2
+} // ns1
+void F<int>::foo(int v) { ++v; --v; int sum = v + v; }
+
+void free_function() { int a = 0; ++a; }
+
+void free_function(int i) {}
+
+void free_inline_function(int a) { a++; a = a + 1; free_function(a); }
+
