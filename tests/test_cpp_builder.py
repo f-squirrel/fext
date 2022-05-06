@@ -7,8 +7,8 @@ from fext import cppfilebuilder
 class TestCppBuilder(unittest.TestCase):
 
     def test_messages(self):
-        filename = "tests/test_input/multiple_declarations.h"
-        expected_filename = "tests/test_input/expected_multiple_declaration.txt"
+        filename = "tests/input/multiple_declarations.h"
+        expected_filename = "tests/expected_output/multiple_declaration.txt"
 
         filter = nodefilter.NodeFilter(filename)
         root = filter.filter()
