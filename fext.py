@@ -2,9 +2,11 @@
 
 import argparse
 from fext import cppfilebuilder
+from fext import cppfileupdater
 from fext import diagnostic
 from fext import nodefilter
 from fext import headerfileupdater
+import os
 
 
 def parse_args():
@@ -29,12 +31,17 @@ def main():
     root = filter.filter()
     with open(filename, 'r') as f:
         content = f.read()
-
         if args.fix:
-            builder = cppfilebuilder.CppFileBuilder(root, content)
-            print("Generated CPP:\n{}".format(builder.build()))
             header_updater = headerfileupdater.HeaderFileUpdater(root, content)
             print("Generated Header:\n{}".format(header_updater.update()))
+            file = os.path.splitext(filename)[0] + ".cpp"
+            if os.path.exists(file):
+                updater = cppfileupdater.CppFileUpdater(root, file)
+                print("Updated CPP:\n{}".format(updater.build()))
+            else:
+                builder = cppfilebuilder.CppFileBuilder(root, content)
+                print("Generated CPP:\n{}".format(builder.build()))
+
         else:
             diag = diagnostic.Diagnostic(root, content)
             print(diag.show())
